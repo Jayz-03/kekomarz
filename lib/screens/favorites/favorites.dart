@@ -43,17 +43,15 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
         DataSnapshot snapshot = await cartRef.get();
 
         if (snapshot.exists) {
-          // Product is already in the cart
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Product is already in the cart!')),
             );
           }
         } else {
-          // Add the product to the cart with default quantity value 1
           Map<String, dynamic> productMap =
               Map<String, dynamic>.from(productData);
-          productMap['quantity'] = 1; // Set default quantity
+          productMap['quantity'] = 1;
           await cartRef.set(productMap);
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -76,7 +74,6 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
     if (_user != null) {
       try {
         if (isFavorite) {
-          // Remove from favorites
           await _favoritesRef.child(_user!.uid).child(productId).remove();
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -84,7 +81,6 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
             );
           }
         } else {
-          // Add to favorites
           Map<String, dynamic> productMap =
               Map<String, dynamic>.from(productData);
           await _favoritesRef
@@ -132,7 +128,6 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
             )
           : Column(
               children: [
-                // Search Bar
                 const SizedBox(height: 10),
                 Padding(
                   padding: const EdgeInsets.only(left: 40, right: 40),
@@ -166,7 +161,6 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                 ),
                 const SizedBox(height: 10),
 
-                // Favorites List
                 Expanded(
                   child: StreamBuilder(
                     stream: _favoritesRef.child(_user!.uid).onValue,
@@ -186,7 +180,6 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                               child: Text('You have no favorites.'));
                         }
 
-                        // Filter favorites based on search query
                         var filteredFavorites =
                             favorites.entries.where((entry) {
                           String productName =

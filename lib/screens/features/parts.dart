@@ -45,17 +45,15 @@ class _PartsScreenState extends State<PartsScreen> {
         DataSnapshot snapshot = await cartRef.get();
 
         if (snapshot.exists) {
-          // Product is already in the cart
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Product is already in the cart!')),
             );
           }
         } else {
-          // Add the product to the cart with default quantity value 1
           Map<String, dynamic> productMap =
               Map<String, dynamic>.from(productData);
-          productMap['quantity'] = 1; // Set default quantity
+          productMap['quantity'] = 1;
           await cartRef.set(productMap);
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -78,13 +76,11 @@ class _PartsScreenState extends State<PartsScreen> {
     if (_user != null) {
       try {
         if (isFavorite) {
-          // Remove from favorites
           await _favoritesRef.child(_user!.uid).child(productId).remove();
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Removed from Favorites!')),
           );
         } else {
-          // Add to favorites
           Map<String, dynamic> productMap =
               Map<String, dynamic>.from(productData);
           await _favoritesRef

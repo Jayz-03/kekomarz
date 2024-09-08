@@ -14,7 +14,7 @@ class ProductCard extends StatefulWidget {
   final Function(bool isFavorite) onToggleFavorite;
   final DatabaseReference favoritesRef;
   final String userId;
-  final VoidCallback onViewDetails; // Added callback for viewing details
+  final VoidCallback onViewDetails;
 
   const ProductCard({
     super.key,
@@ -28,7 +28,7 @@ class ProductCard extends StatefulWidget {
     required this.onToggleFavorite,
     required this.favoritesRef,
     required this.userId,
-    required this.onViewDetails, // Added parameter
+    required this.onViewDetails,
   });
 
   @override
@@ -66,7 +66,6 @@ class _ProductCardState extends State<ProductCard> {
   Future<void> _toggleFavorite() async {
     try {
       if (_isFavorite) {
-        // Remove from favorites
         await widget.favoritesRef
             .child(widget.userId)
             .child(widget.productId)
@@ -77,7 +76,6 @@ class _ProductCardState extends State<ProductCard> {
           );
         }
       } else {
-        // Add to favorites
         Map<String, dynamic> productMap = {
           'category': widget.category,
           'description': widget.description,
@@ -96,7 +94,6 @@ class _ProductCardState extends State<ProductCard> {
           );
         }
       }
-      // Update UI after changing favorite status
       if (mounted) {
         setState(() {
           _isFavorite = !_isFavorite;
@@ -114,7 +111,7 @@ class _ProductCardState extends State<ProductCard> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: widget.onViewDetails, // Handle tap to view details
+      onTap: widget.onViewDetails,
       child: Card(
         color: const Color.fromARGB(255, 241, 240, 240),
         elevation: 4.0,
@@ -131,9 +128,8 @@ class _ProductCardState extends State<ProductCard> {
                 loadingBuilder: (BuildContext context, Widget child,
                     ImageChunkEvent? loadingProgress) {
                   if (loadingProgress == null) {
-                    return child; // Image is fully loaded
+                    return child;
                   } else {
-                    // Show shimmer effect while loading
                     return Shimmer.fromColors(
                       baseColor: Colors.grey[300]!,
                       highlightColor: Colors.grey[100]!,

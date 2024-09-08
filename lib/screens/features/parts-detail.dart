@@ -146,7 +146,7 @@ class _PartsDetailScreenState extends State<PartsDetailScreen> {
                       fit: BoxFit.cover,
                       loadingBuilder: (context, child, loadingProgress) {
                         if (loadingProgress == null) {
-                          return child; // Image loaded
+                          return child;
                         } else {
                           return Shimmer.fromColors(
                             baseColor: Colors.grey[300]!,

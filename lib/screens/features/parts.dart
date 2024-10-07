@@ -122,6 +122,7 @@ class _PartsScreenState extends State<PartsScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 200, 164, 212),
+        title: Text('Parts', style: GoogleFonts.robotoCondensed()),
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 10),

@@ -47,7 +47,17 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: const Color.fromARGB(255, 200, 164, 212),
         title: Text('Order Status', style: GoogleFonts.robotoCondensed()),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 10),
+            child: Image.asset(
+              'assets/images/kekomarz-logo.png',
+              width: 120,
+            ),
+          ),
+        ],
       ),
       body: _orderDetails == null
           ? const Center(child: CircularProgressIndicator())
@@ -56,35 +66,59 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Order ID: ${widget.orderID}',
-                    style: GoogleFonts.robotoCondensed(fontSize: 16),
+                  Card(
+                    elevation: 4,
+                    color: Colors.white,
+                    child: ListTile(
+                      leading: Icon(Icons.shopping_bag),
+                      title: Text(
+                        'Order ID: ${widget.orderID}',
+                        style: GoogleFonts.robotoCondensed(fontSize: 16),
+                      ),
+                      subtitle: Text(
+                        'Order Status: ${_orderDetails!['orderStatus']}',
+                        style: GoogleFonts.robotoCondensed(fontSize: 16),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Card(
+                    elevation: 4,
+                    color: Colors.white,
+                    child: ListTile(
+                      leading: Icon(Icons.person),
+                      title: Text(
+                        'Receiver Name: ${_orderDetails!['receiverName']}',
+                        style: GoogleFonts.robotoCondensed(fontSize: 16),
+                      ),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Address: ${_orderDetails!['address']}',
+                            style: GoogleFonts.robotoCondensed(fontSize: 16),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Mobile: ${_orderDetails!['mobileNumber']}',
+                            style: GoogleFonts.robotoCondensed(fontSize: 16),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 8),
-                  Text(
-                    'Receiver Name: ${_orderDetails!['receiverName']}',
-                    style: GoogleFonts.robotoCondensed(fontSize: 16),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Address: ${_orderDetails!['address']}',
-                    style: GoogleFonts.robotoCondensed(fontSize: 16),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Mobile: ${_orderDetails!['mobileNumber']}',
-                    style: GoogleFonts.robotoCondensed(fontSize: 16),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Total Amount: ₱${_orderDetails!['totalAmount'].toStringAsFixed(2)}',
-                    style: GoogleFonts.robotoCondensed(
-                        fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Order Status: ${_orderDetails!['orderStatus']}',
-                    style: GoogleFonts.robotoCondensed(fontSize: 16),
+                  Card(
+                    elevation: 4,
+                    color: Colors.white,
+                    child: ListTile(
+                      leading: Icon(Icons.price_check_outlined),
+                      title: Text(
+                        'Total Amount: ₱${_orderDetails!['totalAmount'].toStringAsFixed(2)}',
+                        style: GoogleFonts.robotoCondensed(
+                            fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 16),
                   Text(
@@ -97,18 +131,23 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
                       itemCount: _orderDetails!['items'].length,
                       itemBuilder: (context, index) {
                         final item = _orderDetails!['items'][index];
-                        return ListTile(
-                          title: Text(
-                            item['productName'],
-                            style: GoogleFonts.robotoCondensed(fontSize: 16),
-                          ),
-                          subtitle: Text(
-                            '₱${item['price']} x ${item['quantity']}',
-                            style: GoogleFonts.robotoCondensed(fontSize: 14),
-                          ),
-                          trailing: Text(
-                            '₱${(double.parse(item['price']) * item['quantity']).toStringAsFixed(2)}',
-                            style: GoogleFonts.robotoCondensed(fontSize: 14),
+                        return Card(
+                          elevation: 4,
+                          color: Colors.white,
+                          child: ListTile(
+                            leading: Image.network(item['imageUrl']),
+                            title: Text(
+                              item['productName'],
+                              style: GoogleFonts.robotoCondensed(fontSize: 16),
+                            ),
+                            subtitle: Text(
+                              '₱${item['price']} x ${item['quantity']}',
+                              style: GoogleFonts.robotoCondensed(fontSize: 14),
+                            ),
+                            trailing: Text(
+                              '₱${(double.parse(item['price']) * item['quantity']).toStringAsFixed(2)}',
+                              style: GoogleFonts.robotoCondensed(fontSize: 14),
+                            ),
                           ),
                         );
                       },

@@ -31,8 +31,9 @@ class _OrderScreenState extends State<OrderScreen> {
         if (snapshot.exists) {
           setState(() {
             _orders = (snapshot.value as Map).entries.map((entry) {
-              Map<String, dynamic> order = Map<String, dynamic>.from(entry.value);
-              order['orderID'] = entry.key;  // Add the orderID to the order data
+              Map<String, dynamic> order =
+                  Map<String, dynamic>.from(entry.value);
+              order['orderID'] = entry.key; // Add the orderID to the order data
               return order;
             }).toList();
           });
@@ -49,7 +50,17 @@ class _OrderScreenState extends State<OrderScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: const Color.fromARGB(255, 200, 164, 212),
         title: Text('Your Orders', style: GoogleFonts.robotoCondensed()),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 10),
+            child: Image.asset(
+              'assets/images/kekomarz-logo.png',
+              width: 120,
+            ),
+          ),
+        ],
       ),
       body: _orders.isEmpty
           ? const Center(child: Text('You have no orders yet.'))
@@ -57,31 +68,36 @@ class _OrderScreenState extends State<OrderScreen> {
               itemCount: _orders.length,
               itemBuilder: (context, index) {
                 final order = _orders[index];
-                return ListTile(
-                  title: Text(
-                    'Order ID: ${order['orderID']}',
-                    style: GoogleFonts.robotoCondensed(
-                        fontSize: 16, fontWeight: FontWeight.bold),
+                return Card(
+                  margin: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  elevation: 4,
+                  color: Colors.white,
+                  child: ListTile(
+                    title: Text(
+                      'Order ID: ${order['orderID']}',
+                      style: GoogleFonts.robotoCondensed(
+                          fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                    subtitle: Text(
+                      'Total: ₱${order['totalAmount'].toStringAsFixed(2)}',
+                      style: GoogleFonts.robotoCondensed(fontSize: 14),
+                    ),
+                    trailing: Text(
+                      order['orderStatus'],
+                      style: GoogleFonts.robotoCondensed(
+                          fontSize: 14, color: Colors.green),
+                    ),
+                    onTap: () {
+                      // Navigate to OrderStatusScreen with orderID
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              OrderStatusScreen(orderID: order['orderID']),
+                        ),
+                      );
+                    },
                   ),
-                  subtitle: Text(
-                    'Total: ₱${order['totalAmount'].toStringAsFixed(2)}',
-                    style: GoogleFonts.robotoCondensed(fontSize: 14),
-                  ),
-                  trailing: Text(
-                    order['orderStatus'],
-                    style: GoogleFonts.robotoCondensed(
-                        fontSize: 14, color: Colors.green),
-                  ),
-                  onTap: () {
-                    // Navigate to OrderStatusScreen with orderID
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            OrderStatusScreen(orderID: order['orderID']),
-                      ),
-                    );
-                  },
                 );
               },
             ),

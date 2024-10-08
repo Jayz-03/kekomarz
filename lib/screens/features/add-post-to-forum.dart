@@ -5,7 +5,6 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:uuid/uuid.dart';
-import 'package:flutter_image_compress/flutter_image_compress.dart'; // Add this
 
 class AddPostToForumScreen extends StatefulWidget {
   const AddPostToForumScreen({super.key});
@@ -20,7 +19,6 @@ class _AddPostToForumScreenState extends State<AddPostToForumScreen> {
   final _imagePicker = ImagePicker();
   bool _isLoading = false;
 
-  // Pick multiple images
   Future<void> _pickImages() async {
     final List<XFile>? pickedImages = await _imagePicker.pickMultiImage();
     if (pickedImages != null) {
@@ -30,21 +28,12 @@ class _AddPostToForumScreenState extends State<AddPostToForumScreen> {
     }
   }
 
-  // Compress image before uploading
-  Future<XFile?> _compressImage(File file) async {
-    final compressedFile = await FlutterImageCompress.compressAndGetFile(
-      file.absolute.path,
-      '${file.path}_compressed.jpg',
-      quality: 50, // Adjust quality to compress
-    );
-    return compressedFile;
-  }
-
-  // Function to upload the forum post
   Future<void> _addPost() async {
     if (_captionController.text.isEmpty || _selectedImages.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please add a caption and select images')),
+        const SnackBar(
+            content: Text('Please add a caption and select images'),
+            backgroundColor: Colors.red),
       );
       return;
     }
@@ -54,7 +43,6 @@ class _AddPostToForumScreenState extends State<AddPostToForumScreen> {
     });
 
     try {
-      // Get current logged-in user
       User? user = FirebaseAuth.instance.currentUser;
       if (user == null) {
         throw Exception("No user logged in");
@@ -62,43 +50,36 @@ class _AddPostToForumScreenState extends State<AddPostToForumScreen> {
 
       String userId = user.uid;
 
-      // Generate a new forumId
       DatabaseReference forumRef =
           FirebaseDatabase.instance.ref().child('Forum').child(userId).push();
       String forumId = forumRef.key!;
 
-      // Upload images to Firebase Storage
       List<String> imageUrls = [];
-      await Future.wait(_selectedImages.map((image) async {
-        XFile? compressedImage = await _compressImage(image); // Compress image first
-        if (compressedImage == null) return;
-
-        String imageName = const Uuid().v4(); // Generate unique filename
+      for (File image in _selectedImages) {
+        String imageName = const Uuid().v4();
         Reference storageRef = FirebaseStorage.instance
             .ref()
             .child('forum_images/$forumId/$imageName.jpg');
-        UploadTask uploadTask = storageRef.putFile(compressedImage as File); // Upload compressed image
 
+        UploadTask uploadTask = storageRef.putFile(image);
         TaskSnapshot snapshot = await uploadTask.whenComplete(() {});
         String downloadUrl = await snapshot.ref.getDownloadURL();
-        imageUrls.add(downloadUrl); // Add the image URL to the list
-      }).toList());
+        imageUrls.add(downloadUrl);
+      }
 
-      // Prepare the post data with image URLs
       Map<String, dynamic> forumData = {
         'userId': userId,
         'caption': _captionController.text,
-        'images': imageUrls, // Store the image URLs
+        'images': imageUrls,
+        'timestamp': DateTime.now().toIso8601String(),
       };
 
-      // Save post info to Firebase Realtime Database
       await forumRef.set(forumData);
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Post added successfully')),
+        const SnackBar(content: Text('Post added successfully'), ),
       );
 
-      // Clear the fields after posting
       _captionController.clear();
       _selectedImages.clear();
     } catch (e) {

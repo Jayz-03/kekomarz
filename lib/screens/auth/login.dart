@@ -14,7 +14,6 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  final FirebaseAuth _auth = FirebaseAuth.instance;
 
   final _formKey = GlobalKey<FormState>();
   bool _passwordVisible = false;
@@ -27,10 +26,6 @@ class _LoginScreenState extends State<LoginScreen> {
       });
 
       try {
-        UserCredential userCredential = await _auth.signInWithEmailAndPassword(
-          email: emailController.text,
-          password: passwordController.text,
-        );
         Navigator.pushReplacement(
             context, MaterialPageRoute(builder: (context) => ButtomNavTab()));
       } on FirebaseAuthException catch (e) {

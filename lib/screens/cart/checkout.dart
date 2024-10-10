@@ -129,6 +129,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 200, 164, 212),
+        title: Text('Checkout', style: GoogleFonts.robotoCondensed()),
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 10),
@@ -157,7 +158,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                             Padding(
                               padding: const EdgeInsets.all(10),
                               child: Icon(Icons.location_on,
-                                  size: 60,
+                                  size: 30,
                                   color: Color.fromARGB(255, 59, 27, 13)),
                             ),
                             Column(

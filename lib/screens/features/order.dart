@@ -51,7 +51,7 @@ class _OrderScreenState extends State<OrderScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 200, 164, 212),
-        title: Text('Your Orders', style: GoogleFonts.robotoCondensed()),
+        title: Text('My Orders', style: GoogleFonts.robotoCondensed()),
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 10),

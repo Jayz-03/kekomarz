@@ -143,6 +143,7 @@ class _CartScreenState extends State<CartScreen> {
                               Map<String, dynamic>.from(entry.value);
 
                           return Card(
+                            color: Colors.white,
                             elevation: 4.0,
                             margin: const EdgeInsets.symmetric(vertical: 8.0),
                             child: Padding(

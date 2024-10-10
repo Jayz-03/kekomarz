@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -77,7 +78,9 @@ class _AddPostToForumScreenState extends State<AddPostToForumScreen> {
       await forumRef.set(forumData);
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Post added successfully'), ),
+        const SnackBar(
+            content: Text('Post added successfully'),
+            backgroundColor: Colors.green),
       );
 
       _captionController.clear();
@@ -97,7 +100,17 @@ class _AddPostToForumScreenState extends State<AddPostToForumScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add Post to Forum'),
+        backgroundColor: const Color.fromARGB(255, 200, 164, 212),
+        title: Text('Add Post To Forum', style: GoogleFonts.robotoCondensed()),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 10),
+            child: Image.asset(
+              'assets/images/kekomarz-logo.png',
+              width: 120,
+            ),
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

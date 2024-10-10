@@ -73,7 +73,6 @@ class _ForumScreenState extends State<ForumScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // Navigate to the AddPostToForumScreen
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -199,14 +198,12 @@ class _ForumScreenState extends State<ForumScreen> {
     if (_currentUser == null) return;
 
     DatabaseReference postRef =
-        _forumRef.child(_currentUser!.uid).child(postId);
+        _forumRef.child(_currentUser.uid).child(postId);
 
     if (userLiked) {
-      // User already liked, remove the like
-      await postRef.child('likes/${_currentUser!.uid}').remove();
+      await postRef.child('likes/${_currentUser.uid}').remove();
     } else {
-      // User has not liked, add the like
-      await postRef.child('likes/${_currentUser!.uid}').set(true);
+      await postRef.child('likes/${_currentUser.uid}').set(true);
     }
   }
 
@@ -214,14 +211,12 @@ class _ForumScreenState extends State<ForumScreen> {
     if (_currentUser == null) return;
 
     DatabaseReference postRef =
-        _forumRef.child(_currentUser!.uid).child(postId);
+        _forumRef.child(_currentUser.uid).child(postId);
 
     if (userDisliked) {
-      // User already disliked, remove the dislike
-      await postRef.child('dislikes/${_currentUser!.uid}').remove();
+      await postRef.child('dislikes/${_currentUser.uid}').remove();
     } else {
-      // User has not disliked, add the dislike
-      await postRef.child('dislikes/${_currentUser!.uid}').set(true);
+      await postRef.child('dislikes/${_currentUser.uid}').set(true);
     }
   }
 
@@ -287,13 +282,13 @@ class _ForumScreenState extends State<ForumScreen> {
     if (_currentUser == null) return;
 
     DatabaseReference commentRef = _forumRef
-        .child(_currentUser!.uid)
+        .child(_currentUser.uid)
         .child(postId)
         .child('comments')
         .push();
 
     await commentRef.set({
-      'userId': _currentUser!.uid,
+      'userId': _currentUser.uid,
       'message': commentText,
       'timestamp': DateTime.now().toIso8601String(),
     });

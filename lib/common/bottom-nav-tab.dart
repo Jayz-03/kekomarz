@@ -42,18 +42,6 @@ class _ButtomNavTabState extends State<ButtomNavTab> {
           'assets/images/kekomarz-logo.png',
           width: 120,
         ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 10),
-            child: InkWell(
-                onTap: () {},
-                child: Icon(
-                  Icons.notifications,
-                  color: Color.fromARGB(255, 59, 27, 13),
-                  size: 30,
-                )),
-          ),
-        ],
       ),
       body: Center(
         child: _widgetOptions.elementAt(_selectedIndex),

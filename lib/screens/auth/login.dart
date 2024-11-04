@@ -26,11 +26,29 @@ class _LoginScreenState extends State<LoginScreen> {
       });
 
       try {
-        Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (context) => ButtomNavTab()));
+        UserCredential userCredential =
+            await FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: emailController.text.trim(),
+          password: passwordController.text.trim(),
+        );
+
+        if (userCredential.user != null) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => ButtomNavTab()),
+          );
+        }
       } on FirebaseAuthException catch (e) {
+        String message;
+        if (e.code == 'user-not-found') {
+          message = 'No user found for that email.';
+        } else if (e.code == 'wrong-password') {
+          message = 'Wrong password provided for that user.';
+        } else {
+          message = 'Invalid email or password!';
+        }
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: ${e.message}')),
+          SnackBar(content: Text(message)),
         );
       } finally {
         setState(() {

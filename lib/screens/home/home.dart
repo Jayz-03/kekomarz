@@ -141,13 +141,6 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             Divider(color: Color.fromARGB(255, 100, 59, 159)),
             const SizedBox(height: 10),
-            Text(
-              'Top Post',
-              style: GoogleFonts.robotoCondensed(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-              ),
-            ),
           ],
         ),
       ),

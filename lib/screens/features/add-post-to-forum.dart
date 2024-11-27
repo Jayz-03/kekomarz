@@ -30,11 +30,12 @@ class _AddPostToForumScreenState extends State<AddPostToForumScreen> {
   }
 
   Future<void> _addPost() async {
-    if (_captionController.text.isEmpty || _selectedImages.isEmpty) {
+    if (_captionController.text.isEmpty && _selectedImages.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-            content: Text('Please add a caption and select images'),
-            backgroundColor: Colors.red),
+          content: Text('Please add a caption or select images'),
+          backgroundColor: Colors.red,
+        ),
       );
       return;
     }
@@ -56,16 +57,18 @@ class _AddPostToForumScreenState extends State<AddPostToForumScreen> {
       String forumId = forumRef.key!;
 
       List<String> imageUrls = [];
-      for (File image in _selectedImages) {
-        String imageName = const Uuid().v4();
-        Reference storageRef = FirebaseStorage.instance
-            .ref()
-            .child('forum_images/$forumId/$imageName.jpg');
+      if (_selectedImages.isNotEmpty) {
+        for (File image in _selectedImages) {
+          String imageName = const Uuid().v4();
+          Reference storageRef = FirebaseStorage.instance
+              .ref()
+              .child('forum_images/$forumId/$imageName.jpg');
 
-        UploadTask uploadTask = storageRef.putFile(image);
-        TaskSnapshot snapshot = await uploadTask.whenComplete(() {});
-        String downloadUrl = await snapshot.ref.getDownloadURL();
-        imageUrls.add(downloadUrl);
+          UploadTask uploadTask = storageRef.putFile(image);
+          TaskSnapshot snapshot = await uploadTask.whenComplete(() {});
+          String downloadUrl = await snapshot.ref.getDownloadURL();
+          imageUrls.add(downloadUrl);
+        }
       }
 
       Map<String, dynamic> forumData = {
@@ -79,12 +82,15 @@ class _AddPostToForumScreenState extends State<AddPostToForumScreen> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-            content: Text('Post added successfully'),
-            backgroundColor: Colors.green),
+          content: Text('Post added successfully'),
+          backgroundColor: Colors.green,
+        ),
       );
 
       _captionController.clear();
-      _selectedImages.clear();
+      setState(() {
+        _selectedImages.clear();
+      });
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error: $e')),
@@ -117,36 +123,94 @@ class _AddPostToForumScreenState extends State<AddPostToForumScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Caption Input
             TextField(
               controller: _captionController,
               decoration: const InputDecoration(
-                labelText: 'Caption',
+                labelText: 'Caption (optional)',
                 border: OutlineInputBorder(),
               ),
               maxLines: 2,
             ),
             const SizedBox(height: 16),
+
+            // Image Picker
             ElevatedButton.icon(
               onPressed: _pickImages,
               icon: const Icon(Icons.photo),
-              label: const Text('Pick Images'),
+              label: Text(
+                'Pick Images',
+                style: GoogleFonts.robotoCondensed(
+                  fontSize: 16,
+                  color: Colors.black,
+                ),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white,
+                minimumSize: const Size(double.infinity, 50),
+                textStyle: GoogleFonts.robotoCondensed(
+                  fontSize: 16,
+                  color: Colors.white,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
             ),
             const SizedBox(height: 16),
+
+            // Selected Images Preview
             _selectedImages.isNotEmpty
                 ? Wrap(
                     spacing: 10,
                     children: _selectedImages.map((img) {
-                      return Image.file(img,
-                          width: 100, height: 100, fit: BoxFit.cover);
+                      return Stack(
+                        children: [
+                          Image.file(img,
+                              width: 100, height: 100, fit: BoxFit.cover),
+                          Positioned(
+                            top: 0,
+                            right: 0,
+                            child: IconButton(
+                              icon: const Icon(Icons.close, color: Colors.red),
+                              onPressed: () {
+                                setState(() {
+                                  _selectedImages.remove(img);
+                                });
+                              },
+                            ),
+                          ),
+                        ],
+                      );
                     }).toList(),
                   )
                 : const Text('No images selected'),
+
             const Spacer(),
+
+            // Submit Button
             ElevatedButton(
               onPressed: _isLoading ? null : _addPost,
               child: _isLoading
                   ? const CircularProgressIndicator(color: Colors.white)
-                  : const Text('Submit Post'),
+                  : Text(
+                      'Submit Post',
+                      style: GoogleFonts.robotoCondensed(
+                        fontSize: 16,
+                        color: Colors.black,
+                      ),
+                    ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white,
+                minimumSize: const Size(double.infinity, 50),
+                textStyle: GoogleFonts.robotoCondensed(
+                  fontSize: 16,
+                  color: Colors.white,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
             ),
           ],
         ),

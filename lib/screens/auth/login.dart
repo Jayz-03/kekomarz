@@ -32,11 +32,30 @@ class _LoginScreenState extends State<LoginScreen> {
           password: passwordController.text.trim(),
         );
 
-        if (userCredential.user != null) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => ButtomNavTab()),
-          );
+        final user = userCredential.user;
+
+        if (user != null) {
+          if (user.emailVerified) {
+            // Navigate to the main screen if email is verified
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => ButtomNavTab()),
+            );
+          } else {
+            // Inform the user that their email is not verified
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Center(
+                  child: Text(
+                    'Email not verified. Please check your inbox and verify your email to proceed.', textAlign: TextAlign.center,
+                  ),
+                ),
+                backgroundColor: Colors.orange,
+              ),
+            );
+            // Optionally, send a new verification email
+            await user.sendEmailVerification();
+          }
         }
       } on FirebaseAuthException catch (e) {
         String message;
@@ -48,7 +67,10 @@ class _LoginScreenState extends State<LoginScreen> {
           message = 'Invalid email or password!';
         }
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(message)),
+          SnackBar(
+            content: Center(child: Text(message)),
+            backgroundColor: Colors.red,
+          ),
         );
       } finally {
         setState(() {

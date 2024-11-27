@@ -47,7 +47,7 @@ class _PartsScreenState extends State<PartsScreen> {
         if (snapshot.exists) {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Product is already in the cart!')),
+              const SnackBar(content: Center(child: Text('Product is already in the cart!')), backgroundColor: Colors.orange,),
             );
           }
         } else {
@@ -57,14 +57,14 @@ class _PartsScreenState extends State<PartsScreen> {
           await cartRef.set(productMap);
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Added to Cart!')),
+              const SnackBar(content: Center(child: Text('Added to Cart!')),  backgroundColor: Colors.green,),
             );
           }
         }
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Error adding to cart')),
+            const SnackBar(content: Center(child: Text('Error adding to cart')),  backgroundColor: Colors.red,),
           );
         }
       }
@@ -78,7 +78,7 @@ class _PartsScreenState extends State<PartsScreen> {
         if (isFavorite) {
           await _favoritesRef.child(_user!.uid).child(productId).remove();
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Removed from Favorites!')),
+            const SnackBar(content: Center(child: Text('Removed from Favorites!')), backgroundColor: Colors.orange,),
           );
         } else {
           Map<String, dynamic> productMap =
@@ -88,13 +88,13 @@ class _PartsScreenState extends State<PartsScreen> {
               .child(productId)
               .set(productMap);
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Added to Favorites!')),
+            const SnackBar(content: Center(child: Text('Added to Favorites!')),  backgroundColor: Colors.green,),
           );
         }
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Failed to update favorites')),
+            const SnackBar(content: Center(child: Text('Failed to update favorites')),  backgroundColor: Colors.red,),
           );
         }
       }

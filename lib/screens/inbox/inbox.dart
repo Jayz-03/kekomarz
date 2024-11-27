@@ -28,20 +28,28 @@ class InboxScreen extends StatelessWidget {
 
             return ListView(
               children: [
-                ListTile(
-                  leading: const Icon(Icons.person),
-                  title: Text('${userData['firstName']} ${userData['lastName']}', style: GoogleFonts.robotoCondensed()),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ConversationScreen(
-                          adminId: adminId,
-                          userId: currentUserId,
+                Card(
+                  elevation: 4,
+                  color: Colors.white,
+                  margin: EdgeInsets.symmetric(horizontal: 10),
+                  child: ListTile(
+                    leading: Image.asset(
+                  'assets/images/kekomarz-logo.png',
+                  height: 60,
+                ),
+                    title: Text('${userData['firstName']} ${userData['lastName']}', style: GoogleFonts.robotoCondensed(fontSize: 20)),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ConversationScreen(
+                            adminId: adminId,
+                            userId: currentUserId,
+                          ),
                         ),
-                      ),
-                    );
-                  },
+                      );
+                    },
+                  ),
                 ),
               ],
             );

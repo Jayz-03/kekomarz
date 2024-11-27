@@ -20,6 +20,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController confirmPasswordController =
       TextEditingController();
+  bool _isPasswordVisible = false;
+  bool _isConfirmPasswordVisible = false;
 
   final _formKey = GlobalKey<FormState>();
 
@@ -49,24 +51,36 @@ class _SignUpScreenState extends State<SignUpScreen> {
         password: passwordController.text,
       );
 
-      final userId = userCredential.user?.uid;
+      final user = userCredential.user;
+      final userId = user?.uid;
 
-      await _database.child('users/$userId').set({
-        "firstName": firstNameController.text,
-        "lastName": lastNameController.text,
-        "email": emailController.text,
-        "address": addressController.text,
-        "mobileNumber": mobileNumberController.text,
-      });
+      if (user != null) {
+        // Send email verification
+        await user.sendEmailVerification();
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Registration successful')),
-      );
+        // Save user data to the database
+        await _database.child('users/$userId').set({
+          "firstName": firstNameController.text,
+          "lastName": lastNameController.text,
+          "email": emailController.text,
+          "address": addressController.text,
+          "mobileNumber": mobileNumberController.text,
+        });
 
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => LoginScreen()),
-      );
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Center(
+                  child: Text(
+                      'Registration successful! Please verify your email.')),
+              backgroundColor: Colors.green),
+        );
+
+        // Navigate to Login screen
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => LoginScreen()),
+        );
+      }
     } on FirebaseAuthException catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error: ${e.message}')),
@@ -315,13 +329,26 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   padding: EdgeInsets.symmetric(horizontal: 20.0),
                   child: Column(
                     children: [
+                      // Password Field
                       TextFormField(
                         cursorColor: Colors.white,
                         controller: passwordController,
                         style: GoogleFonts.robotoCondensed(),
-                        obscureText: true,
+                        obscureText: !_isPasswordVisible, // Toggle visibility
                         decoration: InputDecoration(
                           prefixIcon: Icon(Icons.lock),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _isPasswordVisible
+                                  ? Icons.visibility
+                                  : Icons.visibility_off,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _isPasswordVisible = !_isPasswordVisible;
+                              });
+                            },
+                          ),
                           hintText: 'Password',
                           hintStyle: GoogleFonts.robotoCondensed(),
                           border: OutlineInputBorder(
@@ -348,17 +375,41 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           if (value == null || value.isEmpty) {
                             return 'Password is required';
                           }
+                          // Strong password validation
+                          if (value.length < 8 ||
+                              !RegExp(r'[A-Z]').hasMatch(value) ||
+                              !RegExp(r'[a-z]').hasMatch(value) ||
+                              !RegExp(r'[0-9]').hasMatch(value) ||
+                              !RegExp(r'[!@#$%^&*(),.?":{}|<>]')
+                                  .hasMatch(value)) {
+                            return 'Password must be at least 8 characters long and include uppercase, \nlowercase, number, and special character.';
+                          }
                           return null;
                         },
                       ),
                       SizedBox(height: 20),
+                      // Confirm Password Field
                       TextFormField(
                         cursorColor: Colors.white,
                         controller: confirmPasswordController,
                         style: GoogleFonts.robotoCondensed(),
-                        obscureText: true,
+                        obscureText:
+                            !_isConfirmPasswordVisible, // Toggle visibility
                         decoration: InputDecoration(
                           prefixIcon: Icon(Icons.lock),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _isConfirmPasswordVisible
+                                  ? Icons.visibility
+                                  : Icons.visibility_off,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _isConfirmPasswordVisible =
+                                    !_isConfirmPasswordVisible;
+                              });
+                            },
+                          ),
                           hintText: 'Confirm Password',
                           hintStyle: GoogleFonts.robotoCondensed(),
                           border: OutlineInputBorder(

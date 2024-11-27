@@ -55,6 +55,15 @@ class _ForumScreenState extends State<ForumScreen> {
               }
             });
 
+            // Sort posts by timestamp (optional)
+            allPosts.sort((a, b) {
+              DateTime timeA = DateTime.parse(a['postData']['timestamp'] ??
+                  DateTime.now().toIso8601String());
+              DateTime timeB = DateTime.parse(b['postData']['timestamp'] ??
+                  DateTime.now().toIso8601String());
+              return timeB.compareTo(timeA); // Newest first
+            });
+
             return ListView.builder(
               itemCount: allPosts.length,
               itemBuilder: (context, index) {
@@ -169,14 +178,15 @@ class _ForumScreenState extends State<ForumScreen> {
                       icon: Icon(userLiked
                           ? Icons.thumb_up
                           : Icons.thumb_up_alt_outlined),
-                      onPressed: () => _toggleLike(postId, userLiked),
+                      onPressed: () => _toggleLike(postId, userId, userLiked),
                     ),
                     Text('${likes.length} Likes'),
                     IconButton(
                       icon: Icon(userDisliked
                           ? Icons.thumb_down
                           : Icons.thumb_down_alt_outlined),
-                      onPressed: () => _toggleDislike(postId, userDisliked),
+                      onPressed: () =>
+                          _toggleDislike(postId, userId, userDisliked),
                     ),
                     Text('${dislikes.length} Dislikes'),
                     IconButton(
@@ -194,29 +204,27 @@ class _ForumScreenState extends State<ForumScreen> {
     );
   }
 
-  void _toggleLike(String postId, bool userLiked) async {
+  void _toggleLike(String postId, String userId, bool userLiked) async {
     if (_currentUser == null) return;
 
-    DatabaseReference postRef =
-        _forumRef.child(_currentUser.uid).child(postId);
+    DatabaseReference postRef = _forumRef.child(userId).child(postId);
 
     if (userLiked) {
-      await postRef.child('likes/${_currentUser.uid}').remove();
+      await postRef.child('likes/${_currentUser!.uid}').remove();
     } else {
-      await postRef.child('likes/${_currentUser.uid}').set(true);
+      await postRef.child('likes/${_currentUser!.uid}').set(true);
     }
   }
 
-  void _toggleDislike(String postId, bool userDisliked) async {
+  void _toggleDislike(String postId, String userId, bool userDisliked) async {
     if (_currentUser == null) return;
 
-    DatabaseReference postRef =
-        _forumRef.child(_currentUser.uid).child(postId);
+    DatabaseReference postRef = _forumRef.child(userId).child(postId);
 
     if (userDisliked) {
-      await postRef.child('dislikes/${_currentUser.uid}').remove();
+      await postRef.child('dislikes/${_currentUser!.uid}').remove();
     } else {
-      await postRef.child('dislikes/${_currentUser.uid}').set(true);
+      await postRef.child('dislikes/${_currentUser!.uid}').set(true);
     }
   }
 
@@ -282,13 +290,13 @@ class _ForumScreenState extends State<ForumScreen> {
     if (_currentUser == null) return;
 
     DatabaseReference commentRef = _forumRef
-        .child(_currentUser.uid)
+        .child(_currentUser!.uid)
         .child(postId)
-        .child('comments')
+        .child('comments') 
         .push();
 
     await commentRef.set({
-      'userId': _currentUser.uid,
+      'userId': _currentUser!.uid,
       'message': commentText,
       'timestamp': DateTime.now().toIso8601String(),
     });

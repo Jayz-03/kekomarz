@@ -63,7 +63,42 @@ class _ProfileScreenState extends State<ProfileScreen> {
         'mobileNumber': _mobileNumber,
         'profileImageUrl': _profileImageUrl,
       });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Center(child: Text('Profile updated successfully!')),
+          duration: Duration(seconds: 3),
+          backgroundColor: Colors.green,
+        ),
+      );
     }
+  }
+
+  Future<void> _showSignOutConfirmationDialog() async {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Confirm Sign-Out'),
+          content: Text('Are you sure you want to sign out?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+              child: Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () async {
+                Navigator.of(context).pop(); // Close the dialog
+                await _signOut();
+              },
+              child: Text('Sign Out'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Future<void> _pickImage() async {
@@ -96,7 +131,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Profile', style: GoogleFonts.robotoCondensed(),),
+        title: Text(
+          'Profile',
+          style: GoogleFonts.robotoCondensed(),
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.save),
@@ -247,7 +285,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             const SizedBox(height: 20),
             ElevatedButton(
-              onPressed: _signOut,
+              onPressed: _showSignOutConfirmationDialog,
               child: Text(
                 'Sign Out',
                 style: GoogleFonts.robotoCondensed(

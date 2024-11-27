@@ -93,7 +93,17 @@ class _ConversationScreenState extends State<ConversationScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Chat with Kekomarz', style: GoogleFonts.robotoCondensed(),),
+        backgroundColor: const Color.fromARGB(255, 200, 164, 212),
+        title: Text('Chat with Kekomarz', style: GoogleFonts.robotoCondensed()),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 10),
+            child: Image.asset(
+              'assets/images/kekomarz-logo.png',
+              width: 120,
+            ),
+          ),
+        ],
       ),
       body: Column(
         children: [

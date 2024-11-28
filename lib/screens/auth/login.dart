@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:kekomarz/common/bottom-nav-tab.dart';
+import 'package:kekomarz/screens/auth/forgotPassword.dart';
 import 'package:kekomarz/screens/auth/signup.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -47,7 +48,8 @@ class _LoginScreenState extends State<LoginScreen> {
               SnackBar(
                 content: Center(
                   child: Text(
-                    'Email not verified. Please check your inbox and verify your email to proceed.', textAlign: TextAlign.center,
+                    'Email not verified. Please check your inbox and verify your email to proceed.',
+                    textAlign: TextAlign.center,
                   ),
                 ),
                 backgroundColor: Colors.orange,
@@ -206,7 +208,13 @@ class _LoginScreenState extends State<LoginScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           TextButton(
-                            onPressed: () {},
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => ForgotPasswordScreen()),
+                              );
+                            },
                             child: Text('Forgot Password?',
                                 style: GoogleFonts.robotoCondensed(
                                     color: Colors.white)),

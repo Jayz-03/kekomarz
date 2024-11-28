@@ -90,39 +90,10 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             SizedBox(height: 10),
-            Padding(
-              padding: EdgeInsets.only(left: 40, right: 40),
-              child: Container(
-                padding: EdgeInsets.only(left: 10, right: 10),
-                decoration: BoxDecoration(
-                  color: Color.fromARGB(255, 100, 59, 159),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Row(
-                  children: [
-                    SizedBox(width: 10),
-                    Icon(Icons.search, color: Colors.white),
-                    SizedBox(width: 10),
-                    Expanded(
-                      child: TextField(
-                        style: GoogleFonts.robotoCondensed(color: Colors.white),
-                        decoration: InputDecoration(
-                          hintText: 'Search',
-                          hintStyle:
-                              GoogleFonts.robotoCondensed(color: Colors.white),
-                          border: InputBorder.none,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            SizedBox(height: 10),
             SizedBox(
-              height: 260,
+              height: 600,
               child: GridView.count(
-                crossAxisCount: 3,
+                crossAxisCount: 2,
                 childAspectRatio: 1.0,
                 padding: const EdgeInsets.all(4.0),
                 mainAxisSpacing: 4.0,

@@ -53,7 +53,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     if (_user == null || _userDetails == null) return;
 
     try {
-      // Prepare the order data
       final orderData = {
         'totalAmount': widget.totalAmount + _shippingFee,
         'orderStatus': 'Pending',
@@ -63,6 +62,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         'mobileNumber': _userDetails!['mobileNumber'],
         'timestamp': DateTime.now().millisecondsSinceEpoch,
         'items': widget.selectedProducts,
+        'transaction': "Online",
+        'shippingFee': 60,
       };
 
       // Push the order to Firebase and get the orderID (key)
@@ -111,7 +112,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-              content: Text('Order placed, but failed to update cart.')),
+              content: Center(child: Text('Order placed, but failed to update cart.')), backgroundColor: Colors.green),
         );
       }
     } catch (e) {

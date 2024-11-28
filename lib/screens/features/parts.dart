@@ -217,6 +217,7 @@ class _PartsScreenState extends State<PartsScreen> {
                         imageUrl: productData['imageUrl'],
                         price: productData['price'],
                         productName: productData['productName'],
+                        stock: productData['stock'],
                         onAddToCart: () => _addToCart(productId, productData),
                         onToggleFavorite: (isFavorite) =>
                             _toggleFavorite(productId, productData, isFavorite),

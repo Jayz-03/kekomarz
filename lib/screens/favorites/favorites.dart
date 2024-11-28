@@ -160,7 +160,6 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                   ),
                 ),
                 const SizedBox(height: 10),
-
                 Expanded(
                   child: StreamBuilder(
                     stream: _favoritesRef.child(_user!.uid).onValue,
@@ -218,6 +217,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                               imageUrl: productData['imageUrl'],
                               price: productData['price'],
                               productName: productData['productName'],
+                              stock: productData['stock'],
                               onAddToCart: () =>
                                   _addToCart(productId, productData),
                               onToggleFavorite: (isFavorite) => _toggleFavorite(

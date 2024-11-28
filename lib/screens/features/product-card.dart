@@ -10,6 +10,7 @@ class ProductCard extends StatefulWidget {
   final String imageUrl;
   final String price;
   final String productName;
+  final int stock; // Add stock property
   final VoidCallback onAddToCart;
   final Function(bool isFavorite) onToggleFavorite;
   final DatabaseReference favoritesRef;
@@ -24,6 +25,7 @@ class ProductCard extends StatefulWidget {
     required this.imageUrl,
     required this.price,
     required this.productName,
+    required this.stock, // Include stock here
     required this.onAddToCart,
     required this.onToggleFavorite,
     required this.favoritesRef,
@@ -158,6 +160,14 @@ class _ProductCardState extends State<ProductCard> {
                 '₱${widget.price}',
                 style: GoogleFonts.robotoCondensed(
                     color: const Color.fromARGB(255, 59, 27, 13), fontSize: 14),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: Text(
+                'Stock: ${widget.stock}', // Display stock
+                style: GoogleFonts.robotoCondensed(
+                    color: const Color.fromARGB(255, 59, 27, 13), fontSize: 12),
               ),
             ),
             ButtonBar(

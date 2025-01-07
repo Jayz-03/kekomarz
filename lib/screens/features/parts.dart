@@ -21,6 +21,7 @@ class _PartsScreenState extends State<PartsScreen> {
       FirebaseDatabase.instance.ref().child('Favorites');
   final TextEditingController _searchController = TextEditingController();
   String _searchText = "";
+  String _selectedCategory = "All"; // Default category
   User? _user;
 
   @override
@@ -35,9 +36,7 @@ class _PartsScreenState extends State<PartsScreen> {
   }
 
   Future<void> _addToCart(
-    String productId,
-    Map<dynamic, dynamic> productData,
-  ) async {
+      String productId, Map<dynamic, dynamic> productData) async {
     if (_user != null) {
       try {
         DatabaseReference cartRef =
@@ -47,7 +46,10 @@ class _PartsScreenState extends State<PartsScreen> {
         if (snapshot.exists) {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Center(child: Text('Product is already in the cart!')), backgroundColor: Colors.orange,),
+              const SnackBar(
+                content: Center(child: Text('Product is already in the cart!')),
+                backgroundColor: Colors.orange,
+              ),
             );
           }
         } else {
@@ -57,14 +59,20 @@ class _PartsScreenState extends State<PartsScreen> {
           await cartRef.set(productMap);
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Center(child: Text('Added to Cart!')),  backgroundColor: Colors.green,),
+              const SnackBar(
+                content: Center(child: Text('Added to Cart!')),
+                backgroundColor: Colors.green,
+              ),
             );
           }
         }
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Center(child: Text('Error adding to cart')),  backgroundColor: Colors.red,),
+            const SnackBar(
+              content: Center(child: Text('Error adding to cart')),
+              backgroundColor: Colors.red,
+            ),
           );
         }
       }
@@ -78,7 +86,10 @@ class _PartsScreenState extends State<PartsScreen> {
         if (isFavorite) {
           await _favoritesRef.child(_user!.uid).child(productId).remove();
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Center(child: Text('Removed from Favorites!')), backgroundColor: Colors.orange,),
+            const SnackBar(
+              content: Center(child: Text('Removed from Favorites!')),
+              backgroundColor: Colors.orange,
+            ),
           );
         } else {
           Map<String, dynamic> productMap =
@@ -88,13 +99,19 @@ class _PartsScreenState extends State<PartsScreen> {
               .child(productId)
               .set(productMap);
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Center(child: Text('Added to Favorites!')),  backgroundColor: Colors.green,),
+            const SnackBar(
+              content: Center(child: Text('Added to Favorites!')),
+              backgroundColor: Colors.green,
+            ),
           );
         }
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Center(child: Text('Failed to update favorites')),  backgroundColor: Colors.red,),
+            const SnackBar(
+              content: Center(child: Text('Failed to update favorites')),
+              backgroundColor: Colors.red,
+            ),
           );
         }
       }
@@ -138,31 +155,66 @@ class _PartsScreenState extends State<PartsScreen> {
           const SizedBox(height: 10),
           Padding(
             padding: const EdgeInsets.only(left: 40, right: 40),
-            child: Container(
-              padding: const EdgeInsets.only(left: 10, right: 10),
-              decoration: BoxDecoration(
-                color: const Color.fromARGB(255, 100, 59, 159),
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Row(
-                children: [
-                  const SizedBox(width: 10),
-                  const Icon(Icons.search, color: Colors.white),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: TextField(
-                      style: GoogleFonts.robotoCondensed(color: Colors.white),
-                      controller: _searchController,
-                      decoration: InputDecoration(
-                        hintText: 'Search by name or category',
-                        hintStyle:
-                            GoogleFonts.robotoCondensed(color: Colors.white),
-                        border: InputBorder.none,
-                      ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    padding: const EdgeInsets.only(left: 10, right: 10),
+                    decoration: BoxDecoration(
+                      color: const Color.fromARGB(255, 100, 59, 159),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Row(
+                      children: [
+                        const SizedBox(width: 10),
+                        const Icon(Icons.search, color: Colors.white),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: TextField(
+                            style: GoogleFonts.robotoCondensed(
+                                color: Colors.white),
+                            controller: _searchController,
+                            decoration: InputDecoration(
+                              hintText: 'Search by name or category',
+                              hintStyle: GoogleFonts.robotoCondensed(
+                                  color: Colors.white),
+                              border: InputBorder.none,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ],
-              ),
+                ),
+                const SizedBox(width: 10),
+                DropdownButton<String>(
+                  value: _selectedCategory,
+                  dropdownColor: Colors.white,
+                  items: [
+                    'All',
+                    'Engine Parts',
+                    'Exhaust Systems',
+                    'Suspension & Brakes',
+                    'Body & Frame',
+                    'Electrical & Lighting',
+                    'Tires & Wheels',
+                    'Accessories'
+                  ]
+                      .map((category) => DropdownMenuItem<String>(
+                            value: category,
+                            child: Text(
+                              category,
+                              style: GoogleFonts.robotoCondensed(),
+                            ),
+                          ))
+                      .toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedCategory = value!;
+                    });
+                  },
+                ),
+              ],
             ),
           ),
           const SizedBox(height: 10),
@@ -184,8 +236,11 @@ class _PartsScreenState extends State<PartsScreen> {
                   var filteredProducts = products.entries.where((product) {
                     String name = product.value['productName'].toLowerCase();
                     String category = product.value['category'].toLowerCase();
-                    return name.contains(_searchText) ||
+                    bool matchesSearch = name.contains(_searchText) ||
                         category.contains(_searchText);
+                    bool matchesCategory = _selectedCategory == "All" ||
+                        product.value['category'] == _selectedCategory;
+                    return matchesSearch && matchesCategory;
                   }).toList();
 
                   if (filteredProducts.isEmpty) {

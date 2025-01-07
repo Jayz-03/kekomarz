@@ -112,7 +112,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-              content: Center(child: Text('Order placed, but failed to update cart.')), backgroundColor: Colors.green),
+              content: Center(
+                  child: Text('Order placed, but failed to update cart.')),
+              backgroundColor: Colors.green),
         );
       }
     } catch (e) {
@@ -148,6 +150,37 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  Card(
+                    color: Colors.white,
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Row(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(10.0),
+                            child: Icon(
+                              Icons.warning,
+                              size: 30,
+                              color: Colors.red,
+                            ),
+                          ),
+                          Flexible(
+                            child: Padding(
+                              padding: const EdgeInsets.only(right: 10.0),
+                              child: Text(
+                                'We kindly inform you that payment for this transaction is available via Cash on Delivery (COD) only; please prepare the exact amount upon delivery.',
+                                style: GoogleFonts.robotoCondensed(
+                                  fontSize: 16,
+                                  color: Colors.red,
+                                ),
+                                textAlign: TextAlign.justify,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                   SizedBox(
                     width: MediaQuery.of(context).size.width,
                     child: Card(

@@ -19,6 +19,10 @@ class _ForumScreenState extends State<ForumScreen> {
       FirebaseDatabase.instance.ref().child('users');
   final User? _currentUser = FirebaseAuth.instance.currentUser;
 
+  // Pagination variables
+  int _currentPage = 1;
+  final int _postsPerPage = 10;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -57,21 +61,61 @@ class _ForumScreenState extends State<ForumScreen> {
 
             // Sort posts by timestamp (optional)
             allPosts.sort((a, b) {
-              DateTime timeA = DateTime.parse(a['postData']['timestamp'] ??
+              DateTime timeA = DateTime.parse(a['postData']['timestamp'] ?? 
                   DateTime.now().toIso8601String());
-              DateTime timeB = DateTime.parse(b['postData']['timestamp'] ??
+              DateTime timeB = DateTime.parse(b['postData']['timestamp'] ?? 
                   DateTime.now().toIso8601String());
               return timeB.compareTo(timeA); // Newest first
             });
 
-            return ListView.builder(
-              itemCount: allPosts.length,
-              itemBuilder: (context, index) {
-                String postId = allPosts[index]['postId'];
-                String userId = allPosts[index]['userId'];
-                Map<dynamic, dynamic> post = allPosts[index]['postData'];
-                return _buildPostCard(postId, post, userId);
-              },
+            // Pagination logic: show posts based on the current page
+            int startIndex = (_currentPage - 1) * _postsPerPage;
+            int endIndex = (_currentPage * _postsPerPage).clamp(0, allPosts.length);
+
+            return Column(
+              children: [
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: endIndex - startIndex,
+                    itemBuilder: (context, index) {
+                      String postId = allPosts[startIndex + index]['postId'];
+                      String userId = allPosts[startIndex + index]['userId'];
+                      Map<dynamic, dynamic> post = allPosts[startIndex + index]['postData'];
+                      return _buildPostCard(postId, post, userId);
+                    },
+                  ),
+                ),
+                if (allPosts.length > _postsPerPage)
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        ElevatedButton(
+                          onPressed: _currentPage > 1
+                              ? () {
+                                  setState(() {
+                                    _currentPage--;
+                                  });
+                                }
+                              : null,
+                          child: Text("Previous"),
+                        ),
+                        SizedBox(width: 10),
+                        ElevatedButton(
+                          onPressed: _currentPage * _postsPerPage < allPosts.length
+                              ? () {
+                                  setState(() {
+                                    _currentPage++;
+                                  });
+                                }
+                              : null,
+                          child: Text("Next"),
+                        ),
+                      ],
+                    ),
+                  ),
+              ],
             );
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
@@ -108,8 +152,7 @@ class _ForumScreenState extends State<ForumScreen> {
     return {'firstName': 'Unknown', 'lastName': 'Unknown'};
   }
 
-  Widget _buildPostCard(
-      String postId, Map<dynamic, dynamic> post, String userId) {
+  Widget _buildPostCard(String postId, Map<dynamic, dynamic> post, String userId) {
     Map<dynamic, dynamic> likesMap = post['likes'] ?? {};
     Map<dynamic, dynamic> dislikesMap = post['dislikes'] ?? {};
     Map<dynamic, dynamic> commentsMap = post['comments'] ?? {};
@@ -117,16 +160,10 @@ class _ForumScreenState extends State<ForumScreen> {
     List<dynamic> images = post['images'] ?? [];
     String timestamp = post['timestamp'] ?? DateTime.now().toString();
 
-    List<dynamic> likes = likesMap.keys.toList();
-    List<dynamic> dislikes = dislikesMap.keys.toList();
-    List<Map<dynamic, dynamic>> comments = commentsMap.entries
-        .map((e) => {'commentId': e.key, 'commentData': e.value})
-        .toList();
-
-    bool userLiked = likes.contains(_currentUser?.uid);
-    bool userDisliked = dislikes.contains(_currentUser?.uid);
-
     DateTime postTime = DateTime.parse(timestamp);
+
+    bool userLiked = likesMap.containsKey(_currentUser?.uid);
+    bool userDisliked = dislikesMap.containsKey(_currentUser?.uid);
 
     return FutureBuilder<Map<String, String>>(
       future: _getUserInfo(userId),
@@ -142,6 +179,9 @@ class _ForumScreenState extends State<ForumScreen> {
           elevation: 4,
           color: Colors.white,
           margin: const EdgeInsets.all(10),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
           child: Padding(
             padding: const EdgeInsets.all(10),
             child: Column(
@@ -172,15 +212,21 @@ class _ForumScreenState extends State<ForumScreen> {
                     : const SizedBox(),
                 const SizedBox(height: 10),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
+                    IconButton(
+                      icon: const Icon(Icons.delete),
+                      onPressed: _currentUser?.uid == userId
+                          ? () => _deletePost(postId, userId)
+                          : null,
+                    ),
                     IconButton(
                       icon: Icon(userLiked
                           ? Icons.thumb_up
                           : Icons.thumb_up_alt_outlined),
                       onPressed: () => _toggleLike(postId, userId, userLiked),
                     ),
-                    Text('${likes.length} Likes'),
+                    Text('${likesMap.length}'),
                     IconButton(
                       icon: Icon(userDisliked
                           ? Icons.thumb_down
@@ -188,12 +234,17 @@ class _ForumScreenState extends State<ForumScreen> {
                       onPressed: () =>
                           _toggleDislike(postId, userId, userDisliked),
                     ),
-                    Text('${dislikes.length} Dislikes'),
+                    Text('${dislikesMap.length}'),
                     IconButton(
                       icon: const Icon(Icons.comment),
-                      onPressed: () => _showComments(postId, comments),
+                      onPressed: () => _showComments(postId, commentsMap),
                     ),
-                    Text('${comments.length} Comments'),
+                    Text('${commentsMap.length}'),
+                    if (_currentUser?.uid == userId)
+                      IconButton(
+                        icon: const Icon(Icons.delete),
+                        onPressed: () => _deletePost(postId, userId),
+                      ),
                   ],
                 ),
               ],
@@ -228,10 +279,10 @@ class _ForumScreenState extends State<ForumScreen> {
     }
   }
 
-  void _showComments(String postId, List<Map<dynamic, dynamic>> comments) {
+  void _showComments(String postId, Map<dynamic, dynamic> comments) {
     showModalBottomSheet(
       context: context,
-      builder: (context) {
+      builder: (BuildContext context) {
         return Column(
           children: [
             Expanded(
@@ -239,7 +290,7 @@ class _ForumScreenState extends State<ForumScreen> {
                 itemCount: comments.length,
                 itemBuilder: (context, index) {
                   Map<dynamic, dynamic> comment =
-                      comments[index]['commentData'];
+                      comments.entries.toList()[index].value;
                   String commentTimestamp =
                       comment['timestamp'] ?? DateTime.now().toString();
                   DateTime commentTime = DateTime.parse(commentTimestamp);
@@ -292,7 +343,7 @@ class _ForumScreenState extends State<ForumScreen> {
     DatabaseReference commentRef = _forumRef
         .child(_currentUser!.uid)
         .child(postId)
-        .child('comments') 
+        .child('comments')
         .push();
 
     await commentRef.set({
@@ -302,5 +353,14 @@ class _ForumScreenState extends State<ForumScreen> {
     });
 
     Navigator.pop(context);
+  }
+
+  void _deletePost(String postId, String userId) async {
+    if (_currentUser == null) return;
+
+    // Only the post owner can delete the post
+    if (_currentUser!.uid == userId) {
+      await _forumRef.child(userId).child(postId).remove();
+    }
   }
 }

@@ -20,6 +20,15 @@ class _ServiceScreenState extends State<ServiceScreen> {
     TextEditingController()
   ];
 
+  String? selectedBrand;
+  final List<String> motorcycleBrands = [
+    "Honda",
+    "Yamaha",
+    "Kawasaki",
+    "Suzuki",
+    "Big Bike"
+  ];
+
   final TextEditingController vehicleModelController = TextEditingController();
   final ImagePicker picker = ImagePicker();
   File? _image;
@@ -110,7 +119,8 @@ class _ServiceScreenState extends State<ServiceScreen> {
       "vehicleModel": vehicleModelController.text,
       "totalFee": servicePrices.reduce((a, b) => a + b),
       "imageUrl": imageUrl ?? "No Image", // Store the image URL
-      "serviceStatus": "Pending"
+      "serviceStatus": "Pending",
+      "timestamp": DateTime.now().toIso8601String(),
     };
 
     await serviceRef.set(serviceData);
@@ -134,7 +144,12 @@ class _ServiceScreenState extends State<ServiceScreen> {
 
   void _calculateTotalFee() {
     setState(() {
-      // Calculate total service fee by summing up all se ected service prices
+      double total = servicePrices.reduce((a, b) => a + b);
+      // Apply 10% increase if 'Big Bike' is selected
+      if (selectedBrand == "Big Bike") {
+        total *= 1.10; // Increase price by 10%
+      }
+      servicePrices = [total];
     });
   }
 
@@ -223,32 +238,27 @@ class _ServiceScreenState extends State<ServiceScreen> {
                               ),
                       ),
                       const SizedBox(height: 20),
-                      TextFormField(
-                        style: GoogleFonts.robotoCondensed(),
-                        controller: vehicleModelController,
-                        decoration: InputDecoration(
-                          prefixIcon: Icon(Icons.settings),
-                          hintText: "What's the model of your vehicle?",
-                          hintStyle: GoogleFonts.robotoCondensed(),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8.0),
-                            borderSide: BorderSide(
-                              color: Color.fromARGB(255, 100, 59, 159),
-                            ),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8.0),
-                            borderSide: BorderSide(
-                              color: Color.fromARGB(255, 100, 59, 159),
-                            ),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8.0),
-                            borderSide: BorderSide(
-                              color: Color.fromARGB(255, 100, 59, 159),
-                              width: 2.0,
-                            ),
-                          ),
+                      DropdownButtonFormField<String>(
+                        value: selectedBrand,
+                        hint: Text("Select Motorcycle Brand",
+                            style: GoogleFonts.robotoCondensed()),
+                        items: motorcycleBrands.map((String brand) {
+                          return DropdownMenuItem<String>(
+                            value: brand,
+                            child: Text(brand,
+                                style: GoogleFonts.robotoCondensed()),
+                          );
+                        }).toList(),
+                        onChanged: (newValue) {
+                          setState(() {
+                            selectedBrand = newValue;
+                          });
+                          _calculateTotalFee(); // Recalculate price if brand changes
+                        },
+                        decoration: const InputDecoration(
+                          border: OutlineInputBorder(),
+                          contentPadding: EdgeInsets.symmetric(
+                              vertical: 10, horizontal: 10),
                         ),
                       ),
                       const SizedBox(height: 20),

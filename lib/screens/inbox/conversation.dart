@@ -20,7 +20,8 @@ class ConversationScreen extends StatefulWidget {
 }
 
 class _ConversationScreenState extends State<ConversationScreen> {
-  final DatabaseReference _messagesRef = FirebaseDatabase.instance.ref('messages');
+  final DatabaseReference _messagesRef =
+      FirebaseDatabase.instance.ref('messages');
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   List<Map<String, dynamic>> _chatMessages = [];
@@ -33,7 +34,8 @@ class _ConversationScreenState extends State<ConversationScreen> {
   }
 
   void _fetchConversation() {
-    _messageSubscription = _messagesRef.child(widget.userId).onValue.listen((event) {
+    _messageSubscription =
+        _messagesRef.child(widget.userId).onValue.listen((event) {
       final data = event.snapshot.value as Map?;
       if (data != null) {
         List<Map<String, dynamic>> messages = [];
@@ -56,7 +58,8 @@ class _ConversationScreenState extends State<ConversationScreen> {
           // Scroll to the bottom when new messages arrive
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (_scrollController.hasClients) {
-              _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+              _scrollController
+                  .jumpTo(_scrollController.position.maxScrollExtent);
             }
           });
         }
@@ -64,21 +67,40 @@ class _ConversationScreenState extends State<ConversationScreen> {
     });
   }
 
-  void _sendMessage(String messageContent) {
+  void _sendMessage(String messageContent) async {
     if (messageContent.trim().isEmpty) return;
 
     // Get the current user's ID from Firebase Auth
     final String currentUserId = FirebaseAuth.instance.currentUser!.uid;
 
-    final newMessage = {
-      'senderId': currentUserId, // Use the current user's ID
-      'message': messageContent,
-      'timestamp': DateTime.now().millisecondsSinceEpoch,
-    };
+    // Fetch the current user's first and last name from Firebase Database
+    final userSnapshot =
+        await FirebaseDatabase.instance.ref('users/$currentUserId').once();
 
-    _messagesRef.child(currentUserId).push().set(newMessage);
+    if (userSnapshot.snapshot.value != null) {
+      final userData = Map<String, dynamic>.from(
+        userSnapshot.snapshot.value as Map,
+      );
 
-    _messageController.clear();
+      final senderName = '${userData['firstName']} ${userData['lastName']}';
+
+      // Prepare the new message object
+      final newMessage = {
+        'senderId': currentUserId, // Use the current user's ID
+        'message': messageContent,
+        'senderName': senderName, // Add the sender's full name
+        'senderType': "customer",
+        'timestamp': DateTime.now().millisecondsSinceEpoch,
+      };
+
+      // Push the new message to the database
+      _messagesRef.child(currentUserId).push().set(newMessage);
+
+      // Clear the message input field
+      _messageController.clear();
+    } else {
+      print('Error: User data not found for ID: $currentUserId');
+    }
   }
 
   @override
@@ -113,15 +135,20 @@ class _ConversationScreenState extends State<ConversationScreen> {
               itemCount: _chatMessages.length,
               itemBuilder: (context, index) {
                 final chat = _chatMessages[index];
-                final isUserMessage = chat['senderId'] == FirebaseAuth.instance.currentUser!.uid;
+                final isUserMessage =
+                    chat['senderId'] == FirebaseAuth.instance.currentUser!.uid;
 
                 return Align(
-                  alignment: isUserMessage ? Alignment.centerRight : Alignment.centerLeft,
+                  alignment: isUserMessage
+                      ? Alignment.centerRight
+                      : Alignment.centerLeft,
                   child: Container(
-                    margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                    margin:
+                        const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: isUserMessage ? Colors.blueAccent : Colors.grey[300],
+                      color:
+                          isUserMessage ? Colors.blueAccent : Colors.grey[300],
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Column(
@@ -138,7 +165,8 @@ class _ConversationScreenState extends State<ConversationScreen> {
                           isUserMessage ? 'You' : 'Admin',
                           style: GoogleFonts.robotoCondensed(
                             fontSize: 12,
-                            color: isUserMessage ? Colors.white70 : Colors.black54,
+                            color:
+                                isUserMessage ? Colors.white70 : Colors.black54,
                           ),
                         ),
                       ],

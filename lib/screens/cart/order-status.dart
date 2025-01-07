@@ -43,6 +43,59 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
     }
   }
 
+  Future<void> _cancelOrder() async {
+    if (_user != null) {
+      try {
+        await _ordersRef
+            .child(_user!.uid)
+            .child(widget.orderID)
+            .update({'orderStatus': 'Cancelled'});
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Center(child: Text('Order has been cancelled')),
+            backgroundColor: Colors.green,
+          ),
+        );
+        setState(() {
+          _orderDetails!['orderStatus'] =
+              'Cancelled'; // Update the UI immediately
+        });
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Error cancelling the order')),
+        );
+      }
+    }
+  }
+
+  // Show confirmation dialog
+  void _showCancelConfirmation() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Cancel Order'),
+          content: const Text('Are you sure you want to cancel this order?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+              child: const Text('No'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+                _cancelOrder(); // Proceed with cancellation
+              },
+              child: const Text('Yes'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -66,6 +119,22 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Show remarks only if the order status is "Rejected"
+                  if (_orderDetails!['orderStatus'] == 'Rejected') ...[
+                    Card(
+                      elevation: 4,
+                      color: Colors.white,
+                      child: ListTile(
+                        title: Text(
+                          'Remarks: ${_orderDetails!['remarks']}',
+                          style: GoogleFonts.robotoCondensed(
+                              fontSize: 16, color: Colors.red),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                  ],
+                  // Order ID card
                   Card(
                     elevation: 4,
                     color: Colors.white,
@@ -82,6 +151,7 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
                     ),
                   ),
                   const SizedBox(height: 4),
+                  // Receiver Name card
                   Card(
                     elevation: 4,
                     color: Colors.white,
@@ -108,6 +178,7 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
                     ),
                   ),
                   const SizedBox(height: 8),
+                  // Total Amount card
                   Card(
                     elevation: 4,
                     color: Colors.white,
@@ -121,6 +192,7 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
                     ),
                   ),
                   const SizedBox(height: 16),
+                  // Items list
                   Text(
                     'Items:',
                     style: GoogleFonts.robotoCondensed(
@@ -153,6 +225,28 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
                       },
                     ),
                   ),
+                  // Display the "Cancel Order" button if the order status is "Pending"
+                  if (_orderDetails!['orderStatus'] == 'Pending') ...[
+                    Padding(
+                      padding: const EdgeInsets.only(top: 16.0),
+                      child: ElevatedButton(
+                        onPressed:
+                            _showCancelConfirmation, // Show confirmation dialog
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,
+                          minimumSize: Size(double.infinity, 50),
+                          textStyle: GoogleFonts.robotoCondensed(
+                              fontSize: 16, color: Colors.white),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: Text('Cancel Order',
+                            style: GoogleFonts.robotoCondensed(
+                                color: Colors.white)),
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),
